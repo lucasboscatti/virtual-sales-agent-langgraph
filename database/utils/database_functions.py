@@ -8,7 +8,7 @@ logging.basicConfig(
 )
 
 
-def get_connection(db_path):
+def get_connection(db_path: str = "database/db/chinook.db"):
     """
     Establish a connection to the SQLite database.
     :return: SQLite connection object.
@@ -16,7 +16,7 @@ def get_connection(db_path):
     return sqlite3.connect(db_path)
 
 
-def insert_product(product_name, category, description, price, quantity, db_path):
+def insert_product(product_name, category, description, price, quantity):
     """
     Inserts a new product into the Products table.
     """
@@ -24,7 +24,7 @@ def insert_product(product_name, category, description, price, quantity, db_path
     INSERT INTO Products (ProductName, Category, Description, Price, Quantity)
     VALUES (?, ?, ?, ?, ?);
     """
-    with get_connection(db_path) as conn:
+    with get_connection() as conn:
         with closing(conn.cursor()) as cursor:
             try:
                 cursor.execute(
