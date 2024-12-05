@@ -1,0 +1,242 @@
+[
+    {
+        "product_id": 1,
+        "product_name": "Maçã",
+        "category": "Frutas",
+        "description": "Maçã vermelha, crocante e suculenta.",
+        "price": 2.99,
+        "quantity": 100
+    },
+    {
+        "product_id": 2,
+        "product_name": "Banana nanica",
+        "category": "Frutas",
+        "description": "Banana madura, ideal para consumo imediato.",
+        "price": 1.99,
+        "quantity": 150
+    },
+    {
+        "product_id": 3,
+        "product_name": "Alface americana",
+        "category": "Verduras",
+        "description": "Alface americana fresca, ideal para saladas.",
+        "price": 3.49,
+        "quantity": 80
+    },
+    {
+        "product_id": 4,
+        "product_name": "Tomate cereja",
+        "category": "Verduras",
+        "description": "Tomates cereja vermelhos e maduros.",
+        "price": 4.99,
+        "quantity": 120
+    },
+    {
+        "product_id": 5,
+        "product_name": "Cenoura",
+        "category": "Verduras",
+        "description": "Cenouras frescas e crocantes.",
+        "price": 1.99,
+        "quantity": 200
+    },
+    {
+        "product_id": 6,
+        "product_name": "Leite integral",
+        "category": "Laticínios",
+        "description": "Leite integral pasteurizado, longa vida.",
+        "price": 3.99,
+        "quantity": 200
+    },
+    {
+        "product_id": 7,
+        "product_name": "Queijo mussarela",
+        "category": "Laticínios",
+        "description": "Queijo mussarela fatiado, ideal para pizzas e sanduíches.",
+        "price": 9.99,
+        "quantity": 150
+    },
+    {
+        "product_id": 8,
+        "product_name": "Iogurte natural",
+        "category": "Laticínios",
+        "description": "Iogurte natural, fonte de probióticos.",
+        "price": 2.49,
+        "quantity": 180
+    },
+    {
+        "product_id": 9,
+        "product_name": "Shampoo para cabelos secos",
+        "category": "Higiene pessoal",
+        "description": "Shampoo hidratante para cabelos secos e danificados.",
+        "price": 19.99,
+        "quantity": 50
+    },
+    {
+        "product_id": 10,
+        "product_name": "Sabonete líquido",
+        "category": "Higiene pessoal",
+        "description": "Sabonete líquido antibacteriano.",
+        "price": 4.99,
+        "quantity": 120
+    },
+    {
+        "product_id": 11,
+        "product_name": "Pasta de dente",
+        "category": "Higiene pessoal",
+        "description": "Pasta de dente com flúor.",
+        "price": 3.99,
+        "quantity": 200
+    },
+    {
+        "product_id": 12,
+        "product_name": "Detergente líquido",
+        "category": "Limpeza",
+        "description": "Detergente líquido concentrado para louças.",
+        "price": 9.99,
+        "quantity": 120
+    },
+    {
+        "product_id": 13,
+        "product_name": "Amaciante de roupas",
+        "category": "Limpeza",
+        "description": "Amaciante de roupas com perfume suave.",
+        "price": 12.99,
+        "quantity": 80
+    },
+    {
+        "product_id": 14,
+        "product_name": "Limpador multiuso",
+        "category": "Limpeza",
+        "description": "Limpador multiuso para superfícies diversas.",
+        "price": 7.99,
+        "quantity": 150
+    },
+    {
+        "product_id": 15,
+        "product_name": "Arroz branco",
+        "category": "Alimentos básicos",
+        "description": "Arroz branco tipo 1, ideal para o dia a dia.",
+        "price": 3.99,
+        "quantity": 250
+    },
+    {
+        "product_id": 16,
+        "product_name": "Feijão carioca",
+        "category": "Alimentos básicos",
+        "description": "Feijão carioca, fonte de proteínas e fibras.",
+        "price": 4.99,
+        "quantity": 200
+    },
+    {
+        "product_id": 17,
+        "product_name": "Óleo de soja",
+        "category": "Alimentos básicos",
+        "description": "Óleo de soja, ideal para cozinhar e fritar.",
+        "price": 8.99,
+        "quantity": 180
+    },
+    {
+        "product_id": 18,
+        "product_name": "Açúcar refinado",
+        "category": "Alimentos básicos",
+        "description": "Açúcar refinado, ideal para adoçar bebidas e alimentos.",
+        "price": 2.99,
+        "quantity": 300
+    },
+    {
+        "product_id": 19,
+        "product_name": "Sal refinado",
+        "category": "Alimentos básicos",
+        "description": "Sal refinado, essencial para temperar alimentos.",
+        "price": 1.99,
+        "quantity": 250
+    },
+    {
+        "product_id": 20,
+        "product_name": "Café em pó",
+        "category": "Alimentos básicos",
+        "description": "Café em pó, torra média, ideal para o café da manhã.",
+        "price": 12.99,
+        "quantity": 150
+    },
+    {
+        "product_id": 21,
+        "product_name": "Água mineral",
+        "category": "Bebidas",
+        "description": "Água mineral, 500ml.",
+        "price": 1.50,
+        "quantity": 300
+    },
+    {
+        "product_id": 22,
+        "product_name": "Refrigerante de cola",
+        "category": "Bebidas",
+        "description": "Refrigerante de cola, 2 litros.",
+        "price": 5.99,
+        "quantity": 200
+    },
+    {
+        "product_id": 23,
+        "product": "Suco de laranja",
+        "category": "Bebidas",
+        "description": "Suco de laranja, 1 litro.",
+        "price": 3.99,
+        "quantity": 180
+    },
+    {
+        "product_id": 24,
+        "product_name": "Cerveja",
+        "category": "Bebidas",
+        "description": "Cerveja, lata 350ml.",
+        "price": 3.50,
+        "quantity": 250
+    },
+    {
+        "product_id": 25,
+        "product_name": "Vinho tinto",
+        "category": "Bebidas",
+        "description": "Vinho tinto seco, 750ml.",
+        "price": 29.99,
+        "quantity": 100
+    },
+    {
+        "product_id": 26,
+        "product_name": "Biscoito recheado",
+        "category": "Alimentos industrializados",
+        "description": "Biscoito recheado, pacote de 200g.",
+        "price": 4.99,
+        "quantity": 150
+    },
+    {
+        "product_id": 27,
+        "product_name": "Chocolate ao leite",
+        "category": "Alimentos industrializados",
+        "description": "Chocolate ao leite, barra de 100g.",
+        "price": 3.99,
+        "quantity": 200
+    },
+    {
+        "product_id": 28,
+        "product_name": "Macarrão instantâneo",
+        "category": "Alimentos industrializados",
+        "description": "Macarrão instantâneo, sabor galinha.",
+        "price": 1.99,
+        "quantity": 300
+    },
+    {
+        "product_id": 29,
+        "product_name": "Ketchup",
+        "category": "Condimentos",
+        "description": "Ketchup, 350g.",
+        "price": 3.99,
+        "quantity": 200
+    },
+    {
+        "product_id": 30,
+        "product_name": "Mostarda",
+        "category": "Condimentos",
+        "description": "Mostarda, 250g.",
+        "price": 4.99,
+        "quantity": 150
+    }
+]
