@@ -12,3 +12,4 @@ downloads/
 *.log
 *.csv
 *.env
+.vscode
