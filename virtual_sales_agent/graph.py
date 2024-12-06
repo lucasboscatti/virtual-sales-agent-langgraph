@@ -9,6 +9,7 @@ from nodes import (
     create_order_state,
     get_products_state,
     route_tool,
+    routing_fuction,
     search_products_recommendations_state,
 )
 from prompts import primary_assistant_prompt
@@ -48,10 +49,7 @@ builder.add_node(
 builder.add_edge(START, "assistant")
 builder.add_conditional_edges("assistant", tools_condition, ["tools", END])
 builder.add_edge("tools", "route_tool")
-builder.add_edge("route_tool", "get_products_state")
-builder.add_edge("route_tool", "create_order_state")
-builder.add_edge("route_tool", "check_order_status_state")
-builder.add_edge("route_tool", "search_products_recommendations_state")
+builder.add_conditional_edges("route_tool", routing_fuction),
 builder.add_edge("get_products_state", END)
 builder.add_edge("create_order_state", END)
 builder.add_edge("check_order_status_state", END)
