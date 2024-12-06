@@ -21,7 +21,7 @@ def insert_product(product_name, category, description, price, quantity):
     Inserts a new product into the Products table.
     """
     query = """
-    INSERT INTO Products (ProductName, Category, Description, Price, Quantity)
+    INSERT INTO products (ProductName, Category, Description, Price, Quantity)
     VALUES (?, ?, ?, ?, ?);
     """
     with get_connection() as conn:
