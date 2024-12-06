@@ -101,6 +101,11 @@ def create_order(products: List[Dict[str, Any]], *, config: RunnableConfig) -> s
     get_product_query = """
     SELECT ProductId, Price FROM products WHERE ProductName = ?;
     """
+    subtract_quantity_query = """
+    UPDATE products
+    SET Quantity = Quantity - ?
+    WHERE ProductName = ?;
+    """
 
     with get_connection() as conn:
         with closing(conn.cursor()) as cursor:
@@ -120,6 +125,11 @@ def create_order(products: List[Dict[str, Any]], *, config: RunnableConfig) -> s
                 cursor.execute(
                     order_details_query,
                     (order_id, product_id, quantity, unit_price),
+                )
+
+                cursor.execute(
+                    subtract_quantity_query,
+                    (quantity, product["ProductName"]),
                 )
             conn.commit()
 
