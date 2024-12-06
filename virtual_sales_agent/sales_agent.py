@@ -10,7 +10,6 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import AnyMessage, add_messages
 from langgraph.prebuilt import tools_condition
-from prompts import query_check_system, query_gen_system
 from tools import (
     check_order_status,
     create_order,
@@ -27,6 +26,8 @@ from utils_functions import (
 llm = ChatGroq(
     model="llama3-groq-70b-8192-tool-use-preview", temperature=0, streaming=True
 )
+
+
 class State(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
 
@@ -57,11 +58,16 @@ primary_assistant_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            """You are a helpful virtual sales assistant for an e-commerce platform. 
-Your primary tasks are to assist users with product information, stock availability, order placement, order tracking, and personalized product suggestions based on purchase history.
-Use the provided tools to query product catalogs, customer information, and order details from the database to resolve user inquiries.
-Be persistent when retrieving information—expand your query bounds if the initial attempt does not yield results.
-If no relevant information is found after expanding your search, politely inform the user and guide them toward other available options or next steps.
+            """You are a reliable and helpful virtual sales assistant for an e-commerce platform.  
+Your main responsibilities are:  
+- Assisting users with product information, including availability, pricing, and stock status.  
+- Helping users place orders based on the product database.  
+- Providing updates on the status of existing orders.  
+- Offering personalized product suggestions informed by the user's purchase history.  
+
+Use the available tools to access product catalogs, create orders, and retrieve order details to address user inquiries accurately.  
+Never invent or assume information that is not explicitly provided in the database or tools. Always base your responses on verified data.  
+If your initial attempt to retrieve information is unsuccessful, persist by broadening your query scope. If no relevant information is found after these efforts, politely inform the user and suggest alternative options or next steps..
 \n\nCurrent user:\n<User>\n{user_info}\n</User>
 \nCurrent time: {time}.
 """,
@@ -102,7 +108,7 @@ part_1_graph = builder.compile(checkpointer=memory)
 
 # Let's create an example conversation a user might have with the assistant
 tutorial_questions = [
-    "What are the available products?",
+    "What are the status of my orders?",
 ]
 
 
