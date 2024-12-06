@@ -12,26 +12,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def download_and_save_db(url: str, save_path: str) -> bool:
-    """
-    Downloads a database file from a URL and saves it locally.
-
-    :param url: The URL of the database file to download.
-    :param save_path: The local path where the database file should be saved.
-    :return: True if the download was successful, False otherwise.
-    """
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        with open(save_path, "wb") as file:
-            file.write(response.content)
-        logger.info(f"Database downloaded and saved to {save_path}")
-        return True
-    except requests.RequestException as e:
-        logger.error(f"Failed to download the database: {e}")
-        return False
-
-
 def execute_sql_file(file_path: str) -> bool:
     """
     Executes SQL commands from a file.
@@ -93,17 +73,8 @@ def main():
     Main function to download the database, execute SQL scripts, and insert products.
     """
     logger.info("Starting database setup...")
-    chinook_db_url = (
-        "https://storage.googleapis.com/benchmarks-artifacts/chinook/Chinook.db"
-    )
-    db_path = "database/db/chinook.db"
     sqlite_file = "database/db/schemas.sql"
     products_file = "database/db/products.json"
-
-    # Download database if it doesn't exist
-    if not os.path.exists(db_path):
-        if not download_and_save_db(chinook_db_url):
-            return
 
     # Execute SQL schema file
     if not execute_sql_file(sqlite_file):
