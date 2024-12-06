@@ -1,48 +1,88 @@
 import os
-import sqlite3
 import sys
 from contextlib import closing
-from datetime import date, datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
+from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
+from langchain_community.utilities import SQLDatabase
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
+from langchain_groq import ChatGroq
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
+from typing_extensions import Annotated, TypedDict
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from langchain import hub
+
 from database.utils.database_functions import get_connection
 
+query_prompt_template = hub.pull("langchain-ai/sql-query-system-prompt")
+
+llm = ChatGroq(model="llama-3.1-70b-versatile", temperature=0)
+
+
+def get_engine_for_chinook_db() -> Engine:
+    """
+    Creates an SQLAlchemy engine for the chinook database.
+
+    Returns:
+        Engine: An SQLAlchemy engine object.
+    """
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(script_dir, "../database/db/chinook.db")
+
+    db_uri = f"sqlite:///{db_path}"
+    return create_engine(
+        db_uri,
+    )
+
+
+class QueryOutput(TypedDict):
+    """Generated SQL query."""
+
+    query: Annotated[str, ..., "Syntactically valid SQL query."]
+
 
 @tool
-def query_products() -> List[Dict[str, Any]]:
+def query_products(user_message: str) -> List[Dict[str, Any]]:
     """
-    Shows all available products
+    Creates a query to the products table based on the user's message.
     """
-    query = """
-    SELECT
-        p.ProductId,
-        p.ProductName,
-        p.Category,
-        p.Description,
-        p.Price,
-        p.Quantity
-    FROM Products p
-    WHERE 1=1
-    """
+    engine = get_engine_for_chinook_db()
+    db = SQLDatabase(engine)
+    prompt = query_prompt_template.invoke(
+        {
+            "dialect": db.dialect,
+            "top_k": 10,
+            "table_info": db.get_table_info(table_names=["products"]),
+            "input": user_message,
+        }
+    )
+    structured_llm = llm.with_structured_output(QueryOutput)
+    result = structured_llm.invoke(prompt)
 
-    with get_connection() as conn:
-        with closing(conn.cursor()) as cursor:
-            cursor.execute(query)
-            columns = [column[0] for column in cursor.description]
-            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-
-    return results
+    execute_query_tool = QuerySQLDataBaseTool(db=db)
+    return execute_query_tool.invoke(result["query"])
 
 
 @tool
-def create_order(products: List[Dict[str, Any]], config: RunnableConfig) -> str:
-    """Creates a new order"""
+def create_order(products: List[Dict[str, Any]], *, config: RunnableConfig) -> str:
+    """Creates a new order when the customer wants to buy products
+
+    Args:
+        products (List[Dict[str, Any]]): List of products to be included in the order
+
+    Returns:
+        str: Order ID
+
+    Example:
+        create_order([{"ProductName": "Product A", "Quantity": 2}, {"ProductName": "Product B", "Quantity": 1}])
+        >>> "Order created successfully with order ID: 123"
+    """
 
     configuration = config.get("configurable", {})
     customer_id = configuration.get("customer_id", None)
@@ -51,43 +91,58 @@ def create_order(products: List[Dict[str, Any]], config: RunnableConfig) -> str:
         return ValueError("No customer ID configured.")
 
     order_query = """
-    INSERT INTO Orders (CustomerId, OrderDate, Status)
+    INSERT INTO orders (CustomerId, OrderDate, Status)
     VALUES (?, datetime('now'), 'Pending');
     """
     order_details_query = """
-    INSERT INTO OrderDetails (OrderId, ProductId, Quantity, UnitPrice)
+    INSERT INTO orders_details (OrderId, ProductId, Quantity, UnitPrice)
     VALUES (?, ?, ?, ?);
     """
+    get_product_query = """
+    SELECT ProductId, Price FROM products WHERE ProductName = ?;
+    """
+
     with get_connection() as conn:
         with closing(conn.cursor()) as cursor:
-            # Step 1: Insert the new order
             cursor.execute(order_query, (customer_id,))
-            order_id = cursor.lastrowid  # Get the ID of the newly created order
+            order_id = cursor.lastrowid
 
-            # Step 2: Insert order details
             for product in products:
+                cursor.execute(get_product_query, (product["ProductName"],))
+                product_data = cursor.fetchone()
+
+                if not product_data:
+                    raise ValueError(f"Product not found: {product['ProductName']}")
+
+                product_id, unit_price = product_data
+                quantity = product["Quantity"]
+
                 cursor.execute(
                     order_details_query,
-                    (
-                        order_id,
-                        product["ProductId"],
-                        product["Quantity"],
-                        product["UnitPrice"],
-                    ),
+                    (order_id, product_id, quantity, unit_price),
                 )
-
-            # Commit the transaction
             conn.commit()
 
-            return "Order created successfully with order ID: " + str(order_id)
+            return f"Order created successfully with order ID: {order_id}"
 
 
 @tool
 def check_order_status(
-    order_id, config: RunnableConfig
+    order_id: Union[str, None], *, config: RunnableConfig
 ) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
     """
     Checks the status of orders for a specific customer.
+
+    Args:
+        order_id (Union[str, None]): The ID of the specific order to check. If not provided, all orders for the customer will be returned.
+
+    Returns:
+        Union[List[Dict[str, Any]], Dict[str, Any]]: A list of dictionaries containing order details if no order_id is provided,
+        or a dictionary containing details of the specific order if an order_id is provided.
+        Each dictionary includes the following keys:
+        - OrderId: The ID of the order
+        - Status: The current status of the order
+        - OrderDate: The date the order was placed
     """
     configuration = config.get("configurable", {})
     customer_id = configuration.get("customer_id", None)
@@ -102,7 +157,7 @@ def check_order_status(
             o.OrderId, 
             o.Status, 
             o.OrderDate
-        FROM Orders o
+        FROM orders o
         WHERE o.CustomerId = ? AND o.OrderId = ?;
         """
         with get_connection() as conn:
@@ -121,7 +176,7 @@ def check_order_status(
             o.OrderId, 
             o.Status, 
             o.OrderDate
-        FROM Orders o
+        FROM orders o
         WHERE o.CustomerId = ?
         ORDER BY o.OrderDate DESC;
         """
