@@ -5,12 +5,16 @@ from langgraph.prebuilt import tools_condition
 from nodes import (
     Assistant,
     State,
+    add_order_state,
     check_order_status_state,
+    check_product_quantity_state,
     create_order_state,
     get_products_state,
+    route_create_order,
     route_tool,
     routing_fuction,
     search_products_recommendations_state,
+    subtract_quantity_state,
 )
 from prompts import primary_assistant_prompt
 from tools import (
@@ -44,14 +48,25 @@ builder.add_node("check_order_status_state", check_order_status_state)
 builder.add_node(
     "search_products_recommendations_state", search_products_recommendations_state
 )
+builder.add_node("check_product_quantity_state", check_product_quantity_state)
+builder.add_node("add_order_state", add_order_state)
+builder.add_node("subtract_quantity_state", subtract_quantity_state)
 
 # Define edges: these determine how the control flow moves
 builder.add_edge(START, "assistant")
 builder.add_conditional_edges("assistant", tools_condition, ["tools", END])
 builder.add_edge("tools", "route_tool")
 builder.add_conditional_edges("route_tool", routing_fuction),
+
 builder.add_edge("get_products_state", "assistant")
-builder.add_edge("create_order_state", "assistant")
+
+# create order workflow
+builder.add_edge("create_order_state", "check_product_quantity_state")
+builder.add_conditional_edges("check_product_quantity_state", route_create_order),
+builder.add_edge("add_order_state", "subtract_quantity_state")
+builder.add_edge("subtract_quantity_state", "assistant")
+
+
 builder.add_edge("check_order_status_state", "assistant")
 builder.add_edge("search_products_recommendations_state", "assistant")
 

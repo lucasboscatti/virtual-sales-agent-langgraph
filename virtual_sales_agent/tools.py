@@ -90,50 +90,7 @@ def create_order(products: List[Dict[str, Any]], *, config: RunnableConfig) -> s
     if not customer_id:
         return ValueError("No customer ID configured.")
 
-    order_query = """
-    INSERT INTO orders (CustomerId, OrderDate, Status)
-    VALUES (?, datetime('now'), 'Pending');
-    """
-    order_details_query = """
-    INSERT INTO orders_details (OrderId, ProductId, Quantity, UnitPrice)
-    VALUES (?, ?, ?, ?);
-    """
-    get_product_query = """
-    SELECT ProductId, Price FROM products WHERE ProductName = ?;
-    """
-    subtract_quantity_query = """
-    UPDATE products
-    SET Quantity = Quantity - ?
-    WHERE ProductName = ?;
-    """
-
-    with get_connection() as conn:
-        with closing(conn.cursor()) as cursor:
-            cursor.execute(order_query, (customer_id,))
-            order_id = cursor.lastrowid
-
-            for product in products:
-                cursor.execute(get_product_query, (product["ProductName"],))
-                product_data = cursor.fetchone()
-
-                if not product_data:
-                    raise ValueError(f"Product not found: {product['ProductName']}")
-
-                product_id, unit_price = product_data
-                quantity = product["Quantity"]
-
-                cursor.execute(
-                    order_details_query,
-                    (order_id, product_id, quantity, unit_price),
-                )
-
-                cursor.execute(
-                    subtract_quantity_query,
-                    (quantity, product["ProductName"]),
-                )
-            conn.commit()
-
-            return f"Order created successfully with order ID: {order_id}"
+    return {"Products": products, "CustomerId": customer_id}
 
 
 @tool
