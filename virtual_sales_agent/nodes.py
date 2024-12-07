@@ -1,26 +1,17 @@
-from typing import Annotated, Literal
+import json
+import os
+import sys
+from contextlib import closing
+from typing import Annotated, Dict, Literal
 
-from langchain_core.messages import AIMessage, ToolMessage
-from langchain_core.messages.tool import ToolMessage
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import ToolMessage
 from langchain_core.runnables import Runnable, RunnableConfig
-from langchain_groq import ChatGroq
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import AnyMessage, add_messages
-from langgraph.prebuilt import tools_condition
-from tools import (
-    check_order_status,
-    create_order,
-    query_products,
-    search_products_recommendations,
-)
 from typing_extensions import TypedDict
-from utils_functions import (
-    _print_event,
-    create_tool_node_with_fallback,
-    handle_tool_error,
-)
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from database.utils.database_functions import get_connection
 
 
 class State(TypedDict):
@@ -61,11 +52,77 @@ def get_products_state(state: State): ...
 def create_order_state(state: State): ...
 
 
-def check_order_status_state(state: str): ...
+## see available products
+## if product is available, add to order
+## subtract quantity
+## if product quantity is not available
+## return no quantity
+
+
+def check_order_status_state(state: State) -> Dict[str, str]:
+    tool_messages = json.loads(state["messages"][-1].content)
+    order_id = tool_messages.get("OrderId", None)
+    customer_id = tool_messages.get("CustomerId")
+
+    if order_id:
+        # Query to fetch a specific order's details for the customer
+        query = """
+        SELECT 
+            o.OrderId, 
+            o.Status, 
+            o.OrderDate
+        FROM orders o
+        WHERE o.CustomerId = ? AND o.OrderId = ?;
+        """
+        with get_connection() as conn:
+            with closing(conn.cursor()) as cursor:
+                cursor.execute(query, (customer_id, order_id))
+                result = cursor.fetchone()
+
+        if result:
+            state["messages"][-1].content = json.dumps(result)
+        else:
+            state["messages"][-1].content = json.dumps({"error": "Order not found."})
+
+    else:
+        # Query to fetch all orders for the customer
+        query = """
+        SELECT 
+            o.OrderId, 
+            o.Status, 
+            o.OrderDate
+        FROM orders o
+        WHERE o.CustomerId = ?
+        ORDER BY o.OrderDate DESC;
+        """
+        with get_connection() as conn:
+            with closing(conn.cursor()) as cursor:
+                cursor.execute(query, (customer_id,))
+                results = cursor.fetchall()
+
+        if results:
+            orders = [
+                {"OrderId": row[0], "Status": row[1], "OrderDate": row[2]}
+                for row in results
+            ]
+            state["messages"][-1].content = json.dumps(orders)
+        else:
+            state["messages"][-1].content = json.dumps(
+                {"error": "No orders found for the given customer."}
+            )
+
+    return state
 
 
 def search_products_recommendations_state(state: State): ...
 
 
-def routing_fuction(state: State):
+def routing_fuction(
+    state: State,
+) -> Literal[
+    "get_products_state",
+    "create_order_state",
+    "check_order_status_state",
+    "search_products_recommendations_state",
+]:
     return state["messages"][-1].name + "_state"

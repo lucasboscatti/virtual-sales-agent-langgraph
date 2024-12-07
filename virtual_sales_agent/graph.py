@@ -50,10 +50,10 @@ builder.add_edge(START, "assistant")
 builder.add_conditional_edges("assistant", tools_condition, ["tools", END])
 builder.add_edge("tools", "route_tool")
 builder.add_conditional_edges("route_tool", routing_fuction),
-builder.add_edge("get_products_state", END)
-builder.add_edge("create_order_state", END)
-builder.add_edge("check_order_status_state", END)
-builder.add_edge("search_products_recommendations_state", END)
+builder.add_edge("get_products_state", "assistant")
+builder.add_edge("create_order_state", "assistant")
+builder.add_edge("check_order_status_state", "assistant")
+builder.add_edge("search_products_recommendations_state", "assistant")
 
 # The checkpointer lets the graph persist its state
 # this is a complete memory for the entire graph.

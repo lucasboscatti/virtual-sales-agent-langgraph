@@ -139,7 +139,7 @@ def create_order(products: List[Dict[str, Any]], *, config: RunnableConfig) -> s
 @tool
 def check_order_status(
     order_id: Union[str, None], *, config: RunnableConfig
-) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
+) -> Dict[str, Union[str, None]]:
     """
     Checks the status of orders for a specific customer.
 
@@ -147,12 +147,7 @@ def check_order_status(
         order_id (Union[str, None]): The ID of the specific order to check. If not provided, all orders for the customer will be returned.
 
     Returns:
-        Union[List[Dict[str, Any]], Dict[str, Any]]: A list of dictionaries containing order details if no order_id is provided,
-        or a dictionary containing details of the specific order if an order_id is provided.
-        Each dictionary includes the following keys:
-        - OrderId: The ID of the order
-        - Status: The current status of the order
-        - OrderDate: The date the order was placed
+        Dict[str:str]: A dictionary containing the order ID and the Customer ID.
     """
     configuration = config.get("configurable", {})
     customer_id = configuration.get("customer_id", None)
@@ -161,48 +156,9 @@ def check_order_status(
         return ValueError("No customer ID configured.")
 
     if order_id:
-        # Query to fetch a specific order's details for the customer
-        query = """
-        SELECT 
-            o.OrderId, 
-            o.Status, 
-            o.OrderDate
-        FROM orders o
-        WHERE o.CustomerId = ? AND o.OrderId = ?;
-        """
-        with get_connection() as conn:
-            with closing(conn.cursor()) as cursor:
-                cursor.execute(query, (customer_id, order_id))
-                result = cursor.fetchone()
-
-        if result:
-            return {"OrderId": result[0], "Status": result[1], "OrderDate": result[2]}
-        else:
-            return {"error": "Order not found for the given criteria."}
+        return {"OrderId": order_id, "CustomerId": customer_id}
     else:
-        # Query to fetch all orders for the customer
-        query = """
-        SELECT 
-            o.OrderId, 
-            o.Status, 
-            o.OrderDate
-        FROM orders o
-        WHERE o.CustomerId = ?
-        ORDER BY o.OrderDate DESC;
-        """
-        with get_connection() as conn:
-            with closing(conn.cursor()) as cursor:
-                cursor.execute(query, (customer_id,))
-                results = cursor.fetchall()
-
-        if results:
-            orders = [
-                {"OrderId": row[0], "Status": row[1], "OrderDate": row[2]}
-                for row in results
-            ]
-            return orders
-        else:
-            return {"error": "No orders found for the given customer."}
+        return {"OrderId": None, "CustomerId": customer_id}
 
 
 @tool
