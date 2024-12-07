@@ -135,13 +135,6 @@ def subtract_quantity_state(state: State) -> State:
     return state
 
 
-## see available products
-## if product is available, add to order
-## subtract quantity
-## if product quantity is not available
-## return no quantity
-
-
 def check_order_status_state(state: State) -> Dict[str, str]:
     tool_messages = json.loads(state["messages"][-1].content)
     order_id = tool_messages.get("OrderId", None)
@@ -197,7 +190,64 @@ def check_order_status_state(state: State) -> Dict[str, str]:
     return state
 
 
-def search_products_recommendations_state(state: State): ...
+def search_products_recommendations_state(state: State):
+    tool_messages = json.loads(state["messages"][-1].content)
+    customer_id = tool_messages.get("CustomerId")
+
+    query = """
+    WITH RecentOrders AS (
+    SELECT 
+        od.ProductId, 
+        p.Category, 
+        COUNT(od.ProductId) AS ProductFrequency
+    FROM orders o
+    INNER JOIN orders_details od ON o.OrderId = od.OrderId
+    INNER JOIN products p ON od.ProductId = p.ProductId
+    WHERE o.CustomerId = ? -- Replace with the target customer ID
+    ORDER BY o.OrderDate DESC
+    LIMIT 5
+    ),
+    TopCategories AS (
+        SELECT 
+            Category, 
+            COUNT(Category) AS CategoryFrequency
+        FROM RecentOrders
+        GROUP BY Category
+        ORDER BY CategoryFrequency DESC
+    ),
+    RecommendedProducts AS (
+        SELECT 
+            ProductId, 
+            ProductName, 
+            Category, 
+            Description, 
+            Price 
+        FROM products
+        WHERE Category IN (SELECT Category FROM TopCategories)
+        AND ProductId NOT IN (SELECT ProductId FROM RecentOrders)
+    )
+    SELECT * FROM RecommendedProducts
+    LIMIT 10;
+    """
+    with get_connection() as conn:
+        with closing(conn.cursor()) as cursor:
+            # Only pass one parameter as the query uses one placeholder
+            cursor.execute(query, (customer_id,))
+            results = cursor.fetchall()  # Use fetchall to handle multiple rows
+
+    # Process results into a list of dictionaries
+    recommendations = [
+        {
+            "ProductId": row[0],
+            "ProductName": row[1],
+            "Category": row[2],
+            "Description": row[3],
+            "Price": row[4],
+        }
+        for row in results
+    ]
+    state["messages"][-1].content = json.dumps(recommendations)
+    return state
 
 
 def routing_fuction(

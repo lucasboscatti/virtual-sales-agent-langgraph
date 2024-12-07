@@ -127,39 +127,4 @@ def search_products_recommendations(config: RunnableConfig) -> List[Dict[str, An
     if not customer_id:
         return ValueError("No customer ID configured.")
 
-    query = """
-    SELECT 
-        p.ProductName, 
-        p.Description, 
-        p.Price
-    FROM Products p
-    WHERE p.ProductId IN (
-        SELECT od.ProductId
-        FROM OrderDetails od
-        JOIN Orders o ON od.OrderId = o.OrderId
-        WHERE o.CustomerId = ?
-        GROUP BY od.ProductId
-        ORDER BY SUM(od.Quantity) DESC
-        LIMIT 10
-    )
-    OR p.ProductId IN (
-        SELECT od.ProductId
-        FROM OrderDetails od
-        JOIN Orders o ON od.OrderId = o.OrderId
-        WHERE o.CustomerId != ?
-        GROUP BY od.ProductId
-        ORDER BY SUM(od.Quantity) DESC
-        LIMIT 10
-    );
-    """
-    with get_connection() as conn:
-        with closing(conn.cursor()) as cursor:
-            cursor.execute(query, (customer_id, customer_id))
-            results = cursor.fetchall()
-
-    # Process results into a list of dictionaries
-    recommendations = [
-        {"ProductName": row[0], "Description": row[1], "Price": row[2]}
-        for row in results
-    ]
-    return recommendations
+    return {"CustomerId": customer_id}
