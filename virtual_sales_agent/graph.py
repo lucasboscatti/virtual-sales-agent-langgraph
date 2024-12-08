@@ -11,6 +11,9 @@ from virtual_sales_agent.nodes.create_order_node import (
     create_order_state,
     subtract_quantity_state,
 )
+from virtual_sales_agent.nodes.escalate_to_employee_node import (
+    escalate_to_employee_state,
+)
 from virtual_sales_agent.nodes.query_products_node import query_products_info_state
 from virtual_sales_agent.nodes.recommend_product_node import (
     search_products_recommendations_state,
@@ -25,6 +28,7 @@ from virtual_sales_agent.prompts import primary_assistant_prompt
 from virtual_sales_agent.tools import (
     check_order_status,
     create_order,
+    escalate_to_employee,
     query_products_info,
     search_products_recommendations,
 )
@@ -37,6 +41,7 @@ tools = [
     create_order,
     check_order_status,
     search_products_recommendations,
+    escalate_to_employee,
 ]
 
 assistant_runnable = primary_assistant_prompt | llm.bind_tools(tools)
@@ -53,6 +58,7 @@ builder.add_node("check_order_status_state", check_order_status_state)
 builder.add_node(
     "search_products_recommendations_state", search_products_recommendations_state
 )
+builder.add_node("escalate_to_employee_state", escalate_to_employee_state)
 builder.add_node("check_product_quantity_state", check_product_quantity_state)
 builder.add_node("add_order_state", add_order_state)
 builder.add_node("subtract_quantity_state", subtract_quantity_state)
@@ -77,6 +83,9 @@ builder.add_edge("check_order_status_state", "assistant")
 
 # search products recommendations workflow
 builder.add_edge("search_products_recommendations_state", "assistant")
+
+# escalate to employee workflow
+builder.add_edge("escalate_to_employee_state", "assistant")
 
 # The checkpointer lets the graph persist its state
 # this is a complete memory for the entire graph.

@@ -77,3 +77,19 @@ def search_products_recommendations(config: RunnableConfig) -> Dict[str, str]:
         return ValueError("No customer ID configured.")
 
     return {"CustomerId": customer_id}
+
+
+@tool
+def escalate_to_employee(reason: str, *, config: RunnableConfig) -> Dict[str, str]:
+    """Escalates the conversation to an employee if the customer is not satisfied with the response or you are unable to resolve the issue.
+
+    Args:
+        reason (str): The reason for the escalation.
+    """
+    configuration = config.get("configurable", {})
+    customer_id = configuration.get("customer_id", None)
+
+    if not customer_id:
+        return ValueError("No customer ID configured.")
+
+    return {"reason": reason}

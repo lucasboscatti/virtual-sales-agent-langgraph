@@ -45,7 +45,7 @@ def handle_user_input(question: str, config: dict):
 
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        agent_response = chat_agent(question)
+        agent_response = chat_agent(question, config)
 
         message_placeholder.markdown(agent_response)
 

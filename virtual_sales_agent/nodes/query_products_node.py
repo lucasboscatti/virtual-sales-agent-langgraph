@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Annotated
+from typing import Annotated, Dict
 
 from langchain import hub
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
