@@ -17,7 +17,6 @@ def check_order_status_state(state: State) -> Dict[str, str]:
     customer_id = tool_messages.get("CustomerId")
 
     if order_id:
-        # Query to fetch a specific order's details for the customer
         query = """
         SELECT 
             o.OrderId, 

@@ -3,6 +3,7 @@ import os
 import sys
 from contextlib import closing
 from datetime import datetime
+from typing import Dict
 
 from virtual_sales_agent.nodes.state import State
 
@@ -11,11 +12,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from database.utils.database_functions import get_connection
 
 
-def create_order_state(state: State) -> State:
+def create_order_state(state: State) -> Dict[str, str]:
     return state
 
 
-def check_product_quantity_state(state: State) -> State:
+def check_product_quantity_state(state: State) -> Dict[str, str]:
     tool_messages = json.loads(state["messages"][-1].content)
     products = tool_messages.get("Products")
     state["products_availability"] = {}
@@ -38,7 +39,7 @@ def check_product_quantity_state(state: State) -> State:
     return state
 
 
-def add_order_state(state: State) -> State:
+def add_order_state(state: State) -> Dict[str, str]:
     tool_messages = json.loads(state["messages"][-1].content)
     customer_id = tool_messages.get("CustomerId")
     products = tool_messages.get("Products")
@@ -75,7 +76,7 @@ def add_order_state(state: State) -> State:
     return state
 
 
-def subtract_quantity_state(state: State) -> State:
+def subtract_quantity_state(state: State) -> Dict[str, str]:
     tool_messages = json.loads(state["messages"][-1].content)
     products = tool_messages.get("Products")
 

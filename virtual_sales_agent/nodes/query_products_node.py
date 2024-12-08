@@ -25,11 +25,8 @@ def get_engine_for_chinook_db() -> Engine:
         Engine: An SQLAlchemy engine object.
     """
 
-    script_dir = os.path.dirname(os.path.abspath(''))
+    script_dir = os.path.dirname(os.path.abspath(""))
     db_path = os.path.join(script_dir, "vendedor_virtual/database/db/chinook.db")
-
-    print(f"Database path: {db_path}")
-
     db_uri = f"sqlite:///{db_path}"
     return create_engine(
         db_uri,
@@ -42,11 +39,13 @@ class QueryOutput(TypedDict):
     query: Annotated[str, ..., "Syntactically valid SQL query."]
 
 
-def query_products_info_state(state: State) -> State:
+def query_products_info_state(state: State) -> Dict[str, str]:
     tool_messages = json.loads(state["messages"][-1].content)
     user_message = tool_messages.get("user_message")
+
     engine = get_engine_for_chinook_db()
     db = SQLDatabase(engine)
+
     prompt = query_prompt_template.invoke(
         {
             "dialect": db.dialect,
