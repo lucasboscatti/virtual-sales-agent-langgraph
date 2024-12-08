@@ -16,6 +16,29 @@ def create_order_state(state: State) -> Dict[str, str]:
     return state
 
 
+def validate_product_name_state(state: State) -> Dict[str, str]:
+    tool_messages = json.loads(state["messages"][-1].content)
+    products = tool_messages.get("Products")
+
+    state["valid_products"] = {}
+
+    with get_connection() as conn:
+        with closing(conn.cursor()) as cursor:
+            for product in products:
+                product_name = product["ProductName"].lower()
+                cursor.execute(
+                    "SELECT ProductName FROM products WHERE ProductName = ?",
+                    (product_name,),
+                )
+                result = cursor.fetchone()
+                if not result:
+                    state["valid_products"][product_name] = "no"
+                else:
+                    state["valid_products"][product_name] = "yes"
+
+    return state
+
+
 def check_product_quantity_state(state: State) -> Dict[str, str]:
     tool_messages = json.loads(state["messages"][-1].content)
     products = tool_messages.get("Products")

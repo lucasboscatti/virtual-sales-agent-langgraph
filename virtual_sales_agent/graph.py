@@ -10,6 +10,7 @@ from virtual_sales_agent.nodes.create_order_node import (
     check_product_quantity_state,
     create_order_state,
     subtract_quantity_state,
+    validate_product_name_state,
 )
 from virtual_sales_agent.nodes.escalate_to_employee_node import (
     escalate_to_employee_state,
@@ -21,6 +22,7 @@ from virtual_sales_agent.nodes.recommend_product_node import (
 from virtual_sales_agent.nodes.routing_functions import (
     route_create_order,
     route_tool,
+    route_validate_product_name,
     routing_fuction,
 )
 from virtual_sales_agent.nodes.state import State
@@ -59,6 +61,8 @@ builder.add_node(
     "search_products_recommendations_state", search_products_recommendations_state
 )
 builder.add_node("escalate_to_employee_state", escalate_to_employee_state)
+
+builder.add_node("validate_product_name_state", validate_product_name_state)
 builder.add_node("check_product_quantity_state", check_product_quantity_state)
 builder.add_node("add_order_state", add_order_state)
 builder.add_node("subtract_quantity_state", subtract_quantity_state)
@@ -73,7 +77,10 @@ builder.add_conditional_edges("route_tool", routing_fuction),
 builder.add_edge("query_products_info_state", "assistant")
 
 # create order workflow
-builder.add_edge("create_order_state", "check_product_quantity_state")
+builder.add_edge("create_order_state", "validate_product_name_state")
+builder.add_conditional_edges(
+    "validate_product_name_state", route_validate_product_name
+)
 builder.add_conditional_edges("check_product_quantity_state", route_create_order),
 builder.add_edge("add_order_state", "subtract_quantity_state")
 builder.add_edge("subtract_quantity_state", "assistant")

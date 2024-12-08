@@ -24,6 +24,22 @@ def routing_fuction(
     return state["messages"][-1].name + "_state"
 
 
+def route_validate_product_name(
+    state: State,
+) -> Literal["check_product_quantity_state", "assistant"]:
+    if any(value == "no" for value in state["valid_products"].values()):
+        for product_name, availability in state["valid_products"].items():
+            if availability == "no":
+                tool_messages = {
+                    "Availability": "Product: "
+                    + product_name
+                    + " is not available. Please try another product."
+                }
+                state["messages"][-1].content = json.dumps(tool_messages)
+        return "assistant"
+    return "check_product_quantity_state"
+
+
 def route_create_order(state: State) -> Literal["add_order_state", "assistant"]:
     if any(value == "no" for value in state["products_availability"].values()):
         for product_name, availability in state["products_availability"].items():
