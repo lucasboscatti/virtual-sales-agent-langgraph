@@ -8,8 +8,9 @@ from langchain_community.utilities import SQLDatabase
 from langchain_groq import ChatGroq
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from state import State
 from typing_extensions import Annotated, TypedDict
+
+from virtual_sales_agent.nodes.state import State
 
 query_prompt_template = hub.pull("langchain-ai/sql-query-system-prompt")
 
@@ -24,8 +25,10 @@ def get_engine_for_chinook_db() -> Engine:
         Engine: An SQLAlchemy engine object.
     """
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(script_dir, "../database/db/chinook.db")
+    script_dir = os.path.dirname(os.path.abspath(''))
+    db_path = os.path.join(script_dir, "vendedor_virtual/database/db/chinook.db")
+
+    print(f"Database path: {db_path}")
 
     db_uri = f"sqlite:///{db_path}"
     return create_engine(

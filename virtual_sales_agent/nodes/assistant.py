@@ -1,5 +1,6 @@
 from langchain_core.runnables import Runnable, RunnableConfig
-from state import State
+
+from virtual_sales_agent.nodes.state import State
 
 
 class Assistant:

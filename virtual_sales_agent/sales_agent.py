@@ -1,34 +1,28 @@
 import uuid
 
-from graph import part_1_graph
-from IPython.display import Image, display
-from utils_functions import _print_event
+from virtual_sales_agent.graph import app
+from virtual_sales_agent.utils_functions import _print_event
 
+# from IPython.display import Image, display
 # Visualize your graph
 
 # png = part_1_graph.get_graph().draw_mermaid_png(output_file_path="graph.png")
-
-
-# Let's create an example conversation a user might have with the assistant
-tutorial_questions = [
-    "i want to buy 140 Sal refinado",
-]
 
 
 thread_id = str(uuid.uuid4())
 
 config = {
     "configurable": {
-        "customer_id": "12345678",
+        "customer_id": "12",
         "thread_id": thread_id,
     }
 }
 
 
-_printed = set()
-for question in tutorial_questions:
-    events = part_1_graph.stream(
-        {"messages": ("user", question)}, config, stream_mode="values"
-    )
+def chat_agent(question):
+    set = ()
+    events = app.stream({"messages": ("user", question)}, config)
     for event in events:
-        _print_event(event, _printed)
+        if assistant_response := event.get("assistant"):
+            if final_response := assistant_response["messages"].content:
+                return final_response

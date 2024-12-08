@@ -2,46 +2,50 @@ from langchain_groq import ChatGroq
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import tools_condition
-from nodes.assistant import Assistant
-from nodes.check_order_status_node import check_order_status_state
-from nodes.create_order_node import (
+
+from virtual_sales_agent.nodes.assistant import Assistant
+from virtual_sales_agent.nodes.check_order_status_node import check_order_status_state
+from virtual_sales_agent.nodes.create_order_node import (
     add_order_state,
     check_product_quantity_state,
     create_order_state,
     subtract_quantity_state,
 )
-from nodes.query_products_node import (
-    check_product_quantity_state,
-    query_products_info_state,
+from virtual_sales_agent.nodes.query_products_node import query_products_info_state
+from virtual_sales_agent.nodes.recommend_product_node import (
+    search_products_recommendations_state,
 )
-from nodes.recommend_product_node import search_products_recommendations_state
-from nodes.routing_functions import route_create_order, route_tool, routing_fuction
-from nodes.state import State
-from prompts import primary_assistant_prompt
-from tools import (
+from virtual_sales_agent.nodes.routing_functions import (
+    route_create_order,
+    route_tool,
+    routing_fuction,
+)
+from virtual_sales_agent.nodes.state import State
+from virtual_sales_agent.prompts import primary_assistant_prompt
+from virtual_sales_agent.tools import (
     check_order_status,
     create_order,
     query_products_info,
     search_products_recommendations,
 )
-from utils_functions import create_tool_node_with_fallback
+from virtual_sales_agent.utils_functions import create_tool_node_with_fallback
 
 llm = ChatGroq(model="llama3-groq-70b-8192-tool-use-preview", temperature=0)
 
-part_1_tools = [
-    query_products_info,
+tools = [
+    #query_products_info,
     create_order,
     check_order_status,
     search_products_recommendations,
 ]
 
-assistant_runnable = primary_assistant_prompt | llm.bind_tools(part_1_tools)
+assistant_runnable = primary_assistant_prompt | llm.bind_tools(tools)
 
 builder = StateGraph(State)
 
 # Define nodes: these do the work
 builder.add_node("assistant", Assistant(assistant_runnable))
-builder.add_node("tools", create_tool_node_with_fallback(part_1_tools))
+builder.add_node("tools", create_tool_node_with_fallback(tools))
 builder.add_node("route_tool", route_tool)
 builder.add_node("query_products_info_state", query_products_info_state)
 builder.add_node("create_order_state", create_order_state)
@@ -77,4 +81,4 @@ builder.add_edge("search_products_recommendations_state", "assistant")
 # The checkpointer lets the graph persist its state
 # this is a complete memory for the entire graph.
 memory = MemorySaver()
-part_1_graph = builder.compile(checkpointer=memory)
+app = builder.compile(checkpointer=memory)

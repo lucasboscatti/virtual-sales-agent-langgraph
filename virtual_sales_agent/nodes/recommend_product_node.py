@@ -3,7 +3,7 @@ import os
 import sys
 from contextlib import closing
 
-from state import State
+from virtual_sales_agent.nodes.state import State
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 

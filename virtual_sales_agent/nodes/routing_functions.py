@@ -2,7 +2,8 @@ import json
 from typing import Literal
 
 from langchain_core.messages import ToolMessage
-from state import State
+
+from virtual_sales_agent.nodes.state import State
 
 
 def route_tool(
