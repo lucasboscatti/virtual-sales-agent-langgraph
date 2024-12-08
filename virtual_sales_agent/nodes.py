@@ -5,14 +5,47 @@ from contextlib import closing
 from datetime import datetime
 from typing import Annotated, Dict, Literal
 
+from langchain import hub
+from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
+from langchain_community.utilities import SQLDatabase
 from langchain_core.messages import ToolMessage
 from langchain_core.runnables import Runnable, RunnableConfig
+from langchain_groq import ChatGroq
 from langgraph.graph.message import AnyMessage, add_messages
-from typing_extensions import TypedDict
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
+from typing_extensions import Annotated, TypedDict
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from database.utils.database_functions import get_connection
+
+query_prompt_template = hub.pull("langchain-ai/sql-query-system-prompt")
+
+llm = ChatGroq(model="llama-3.1-70b-versatile", temperature=0)
+
+
+def get_engine_for_chinook_db() -> Engine:
+    """
+    Creates an SQLAlchemy engine for the chinook database.
+
+    Returns:
+        Engine: An SQLAlchemy engine object.
+    """
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(script_dir, "../database/db/chinook.db")
+
+    db_uri = f"sqlite:///{db_path}"
+    return create_engine(
+        db_uri,
+    )
+
+
+class QueryOutput(TypedDict):
+    """Generated SQL query."""
+
+    query: Annotated[str, ..., "Syntactically valid SQL query."]
 
 
 class State(TypedDict):
@@ -51,7 +84,26 @@ def route_tool(
     return state["messages"][-1]
 
 
-def get_products_state(state: State) -> State: ...
+def query_products_state(state: State) -> State:
+    tool_messages = json.loads(state["messages"][-1].content)
+    user_message = tool_messages.get("user_message")
+    engine = get_engine_for_chinook_db()
+    db = SQLDatabase(engine)
+    prompt = query_prompt_template.invoke(
+        {
+            "dialect": db.dialect,
+            "top_k": 10,
+            "table_info": db.get_table_info(table_names=["products"]),
+            "input": user_message,
+        }
+    )
+    structured_llm = llm.with_structured_output(QueryOutput)
+    result = structured_llm.invoke(prompt)
+
+    execute_query_tool = QuerySQLDataBaseTool(db=db)
+    response = execute_query_tool.invoke(result["query"])
+    state["messages"][-1].content = json.dumps(response)
+    return state
 
 
 def create_order_state(state: State) -> State:
@@ -66,7 +118,7 @@ def check_product_quantity_state(state: State) -> State:
     with get_connection() as conn:
         with closing(conn.cursor()) as cursor:
             for product in products:
-                product_name = product["ProductName"]
+                product_name = product["ProductName"].lower()
                 product_quantity = product["Quantity"]
                 cursor.execute(
                     "SELECT Quantity FROM products WHERE ProductName = ?",
@@ -95,7 +147,7 @@ def add_order_state(state: State) -> State:
             order_id = cursor.lastrowid
 
             for product in products:
-                product_name = product["ProductName"]
+                product_name = product["ProductName"].lower()
                 product_quantity = product["Quantity"]
                 cursor.execute(
                     "SELECT ProductId, Price FROM products WHERE ProductName = ?",
@@ -125,7 +177,7 @@ def subtract_quantity_state(state: State) -> State:
     with get_connection() as conn:
         with closing(conn.cursor()) as cursor:
             for product in products:
-                product_name = product["ProductName"]
+                product_name = product["ProductName"].lower()
                 quantity = product["Quantity"]
                 cursor.execute(
                     "UPDATE products SET Quantity = Quantity - ? WHERE ProductName = ?",
@@ -231,21 +283,23 @@ def search_products_recommendations_state(state: State):
     """
     with get_connection() as conn:
         with closing(conn.cursor()) as cursor:
-            # Only pass one parameter as the query uses one placeholder
             cursor.execute(query, (customer_id,))
-            results = cursor.fetchall()  # Use fetchall to handle multiple rows
+            results = cursor.fetchall()
 
-    # Process results into a list of dictionaries
-    recommendations = [
-        {
-            "ProductId": row[0],
-            "ProductName": row[1],
-            "Category": row[2],
-            "Description": row[3],
-            "Price": row[4],
-        }
-        for row in results
-    ]
+            if results:
+                # Process results into a list of dictionaries
+                recommendations = [
+                    {
+                        "ProductId": row[0],
+                        "ProductName": row[1],
+                        "Category": row[2],
+                        "Description": row[3],
+                        "Price": row[4],
+                    }
+                    for row in results
+                ]
+            else:
+                recommendations = {"recommendations": "No purchases made yet."}
     state["messages"][-1].content = json.dumps(recommendations)
     return state
 
@@ -253,7 +307,7 @@ def search_products_recommendations_state(state: State):
 def routing_fuction(
     state: State,
 ) -> Literal[
-    "get_products_state",
+    "query_products_state",
     "create_order_state",
     "check_order_status_state",
     "search_products_recommendations_state",

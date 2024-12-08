@@ -55,8 +55,8 @@ def insert_products_from_json(file_path: str) -> None:
     for _, row in df.iterrows():
         try:
             insert_product(
-                product_name=row.get("product_name"),
-                category=row.get("category"),
+                product_name=row.get("product_name").lower(),
+                category=row.get("category").lower(),
                 description=row.get("description"),
                 price=row.get("price"),
                 quantity=row.get("quantity"),

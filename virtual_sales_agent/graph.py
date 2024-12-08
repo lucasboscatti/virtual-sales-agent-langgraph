@@ -9,7 +9,7 @@ from nodes import (
     check_order_status_state,
     check_product_quantity_state,
     create_order_state,
-    get_products_state,
+    query_products_state,
     route_create_order,
     route_tool,
     routing_fuction,
@@ -42,7 +42,7 @@ builder = StateGraph(State)
 builder.add_node("assistant", Assistant(assistant_runnable))
 builder.add_node("tools", create_tool_node_with_fallback(part_1_tools))
 builder.add_node("route_tool", route_tool)
-builder.add_node("get_products_state", get_products_state)
+builder.add_node("query_products_state", query_products_state)
 builder.add_node("create_order_state", create_order_state)
 builder.add_node("check_order_status_state", check_order_status_state)
 builder.add_node(
@@ -58,7 +58,7 @@ builder.add_conditional_edges("assistant", tools_condition, ["tools", END])
 builder.add_edge("tools", "route_tool")
 builder.add_conditional_edges("route_tool", routing_fuction),
 
-builder.add_edge("get_products_state", "assistant")
+builder.add_edge("query_products_state", "assistant")
 
 # create order workflow
 builder.add_edge("create_order_state", "check_product_quantity_state")
