@@ -1,5 +1,6 @@
 import logging
 import os
+import zipfile
 from contextlib import closing
 
 import pandas as pd
@@ -10,6 +11,43 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
+def download_and_extract_db(url: str, download_path: str, db_path: str) -> bool:
+    """
+    Downloads and extracts the SQLite database.
+
+    :param url: The URL to download the database from.
+    :param download_path: The path to save the downloaded file.
+    :param db_path: The path to extract the database to.
+    :return: True if the database is downloaded and extracted successfully, False otherwise.
+    """
+    try:
+
+        logger.info(f"Downloading database from {url}...")
+        response = requests.get(url)
+        response.raise_for_status()
+
+        with open(download_path, "wb") as file:
+            file.write(response.content)
+        logger.info(f"Database downloaded successfully to {download_path}")
+
+        if zipfile.is_zipfile(download_path):
+            logger.info(f"Extracting database from {download_path}...")
+            with zipfile.ZipFile(download_path, "r") as zip_ref:
+                zip_ref.extractall(os.path.dirname(db_path))
+                os.remove(download_path)
+            logger.info(f"Database extracted successfully to {db_path}")
+        else:
+            logger.warning(
+                f"{download_path} is not a zip file. Assuming it is the database file."
+            )
+            os.rename(download_path, db_path)
+
+        return True
+    except Exception as e:
+        logger.error(f"Failed to download or extract database: {e}")
+        return False
 
 
 def execute_sql_file(file_path: str) -> bool:
@@ -73,6 +111,14 @@ def main():
     Main function to download the database, execute SQL scripts, and insert products.
     """
     logger.info("Starting database setup...")
+    db_url = "https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip"
+    download_path = "database/db/chinook.zip"
+    db_path = "database/db/chinook.db"
+
+    # Download and extract the database
+    if not download_and_extract_db(db_url, download_path, db_path):
+        return
+
     sqlite_file = "database/db/schemas.sql"
     products_file = "database/db/products.json"
 
