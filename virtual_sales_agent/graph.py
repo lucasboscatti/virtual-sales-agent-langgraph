@@ -9,7 +9,7 @@ from nodes import (
     check_order_status_state,
     check_product_quantity_state,
     create_order_state,
-    query_products_state,
+    query_products_info_state,
     route_create_order,
     route_tool,
     routing_fuction,
@@ -20,7 +20,7 @@ from prompts import primary_assistant_prompt
 from tools import (
     check_order_status,
     create_order,
-    query_products,
+    query_products_info,
     search_products_recommendations,
 )
 from utils_functions import create_tool_node_with_fallback
@@ -28,7 +28,7 @@ from utils_functions import create_tool_node_with_fallback
 llm = ChatGroq(model="llama3-groq-70b-8192-tool-use-preview", temperature=0)
 
 part_1_tools = [
-    query_products,
+    query_products_info,
     create_order,
     check_order_status,
     search_products_recommendations,
@@ -42,7 +42,7 @@ builder = StateGraph(State)
 builder.add_node("assistant", Assistant(assistant_runnable))
 builder.add_node("tools", create_tool_node_with_fallback(part_1_tools))
 builder.add_node("route_tool", route_tool)
-builder.add_node("query_products_state", query_products_state)
+builder.add_node("query_products_info_state", query_products_info_state)
 builder.add_node("create_order_state", create_order_state)
 builder.add_node("check_order_status_state", check_order_status_state)
 builder.add_node(
@@ -58,7 +58,8 @@ builder.add_conditional_edges("assistant", tools_condition, ["tools", END])
 builder.add_edge("tools", "route_tool")
 builder.add_conditional_edges("route_tool", routing_fuction),
 
-builder.add_edge("query_products_state", "assistant")
+# query products workflow
+builder.add_edge("query_products_info_state", "assistant")
 
 # create order workflow
 builder.add_edge("create_order_state", "check_product_quantity_state")
@@ -66,8 +67,10 @@ builder.add_conditional_edges("check_product_quantity_state", route_create_order
 builder.add_edge("add_order_state", "subtract_quantity_state")
 builder.add_edge("subtract_quantity_state", "assistant")
 
-
+# check order status workflow
 builder.add_edge("check_order_status_state", "assistant")
+
+# search products recommendations workflow
 builder.add_edge("search_products_recommendations_state", "assistant")
 
 # The checkpointer lets the graph persist its state

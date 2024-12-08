@@ -5,9 +5,15 @@ from langchain_core.tools import tool
 
 
 @tool
-def query_products(user_message: str) -> Dict[str, str]:
+def query_products_info(user_message: str) -> Dict[str, str]:
     """
-    Creates a query to the products table based on the user's message.
+    Searches for products information
+
+    Args:
+        user_message (str): The user's natural language message
+
+    example:
+        query_products_info("What are the most popular products?")
     """
     return {"user_message": user_message}
 
@@ -16,7 +22,8 @@ def query_products(user_message: str) -> Dict[str, str]:
 def create_order(
     products: List[Dict[str, Any]], *, config: RunnableConfig
 ) -> Dict[str, str]:
-    """Creates a new order when the customer wants to buy products
+    """
+    Creates an order for the customer
 
     Args:
         products (List[Dict[str, Any]]): List of products to be included in the order
@@ -43,13 +50,10 @@ def check_order_status(
     order_id: Union[str, None], *, config: RunnableConfig
 ) -> Dict[str, Union[str, None]]:
     """
-    Checks the status of orders for a specific customer.
+    Checks the status of the customer's order(s).
 
     Args:
         order_id (Union[str, None]): The ID of the specific order to check. If not provided, all orders for the customer will be returned.
-
-    Returns:
-        Dict[str:str]: A dictionary containing the order ID and the Customer ID.
     """
     configuration = config.get("configurable", {})
     customer_id = configuration.get("customer_id", None)

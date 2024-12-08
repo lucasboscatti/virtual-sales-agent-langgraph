@@ -22,7 +22,7 @@ from database.utils.database_functions import get_connection
 
 query_prompt_template = hub.pull("langchain-ai/sql-query-system-prompt")
 
-llm = ChatGroq(model="llama-3.1-70b-versatile", temperature=0)
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 
 
 def get_engine_for_chinook_db() -> Engine:
@@ -59,8 +59,8 @@ class Assistant:
     def __call__(self, state: State, config: RunnableConfig):
         while True:
             configuration = config.get("configurable", {})
-            passenger_id = configuration.get("customer_id", None)
-            state = {**state, "user_info": passenger_id}
+            customer_id = configuration.get("customer_id", None)
+            state = {**state, "user_info": customer_id}
             result = self.runnable.invoke(state)
             if not result.tool_calls and (
                 not result.content
@@ -84,7 +84,7 @@ def route_tool(
     return state["messages"][-1]
 
 
-def query_products_state(state: State) -> State:
+def query_products_info_state(state: State) -> State:
     tool_messages = json.loads(state["messages"][-1].content)
     user_message = tool_messages.get("user_message")
     engine = get_engine_for_chinook_db()
@@ -102,7 +102,14 @@ def query_products_state(state: State) -> State:
 
     execute_query_tool = QuerySQLDataBaseTool(db=db)
     response = execute_query_tool.invoke(result["query"])
-    state["messages"][-1].content = json.dumps(response)
+    state["messages"][-1].content = json.dumps(
+        {
+            "query_result": "For the user message: "
+            + user_message
+            + " the query result is: "
+            + str(response)
+        }
+    )
     return state
 
 
@@ -250,13 +257,14 @@ def search_products_recommendations_state(state: State):
     WITH RecentOrders AS (
     SELECT 
         od.ProductId, 
-        p.Category, 
+        p.Category AS Category, 
         COUNT(od.ProductId) AS ProductFrequency
     FROM orders o
     INNER JOIN orders_details od ON o.OrderId = od.OrderId
     INNER JOIN products p ON od.ProductId = p.ProductId
-    WHERE o.CustomerId = ? -- Replace with the target customer ID
-    ORDER BY o.OrderDate DESC
+    WHERE o.CustomerId = ?
+    GROUP BY od.ProductId, p.Category
+    ORDER BY MAX(o.OrderDate) DESC
     LIMIT 5
     ),
     TopCategories AS (
@@ -269,17 +277,24 @@ def search_products_recommendations_state(state: State):
     ),
     RecommendedProducts AS (
         SELECT 
-            ProductId, 
-            ProductName, 
-            Category, 
-            Description, 
-            Price 
-        FROM products
-        WHERE Category IN (SELECT Category FROM TopCategories)
-        AND ProductId NOT IN (SELECT ProductId FROM RecentOrders)
+            p.ProductId, 
+            p.ProductName, 
+            p.Category, 
+            p.Description, 
+            p.Price,
+            ROW_NUMBER() OVER (PARTITION BY p.Category ORDER BY p.Price DESC) AS Rank
+        FROM products p
+        WHERE p.Category IN (SELECT Category FROM TopCategories)
+        AND p.ProductId NOT IN (SELECT ProductId FROM RecentOrders)
     )
-    SELECT * FROM RecommendedProducts
-    LIMIT 10;
+    SELECT 
+        ProductId, 
+        ProductName, 
+        Category, 
+        Description, 
+        Price
+    FROM RecommendedProducts
+    WHERE Rank <= 5;
     """
     with get_connection() as conn:
         with closing(conn.cursor()) as cursor:
@@ -307,7 +322,7 @@ def search_products_recommendations_state(state: State):
 def routing_fuction(
     state: State,
 ) -> Literal[
-    "query_products_state",
+    "query_products_info_state",
     "create_order_state",
     "check_order_status_state",
     "search_products_recommendations_state",
@@ -316,7 +331,6 @@ def routing_fuction(
 
 
 def route_create_order(state: State) -> Literal["add_order_state", "assistant"]:
-    print("STATE", state)
     if any(value == "no" for value in state["products_availability"].values()):
         for product_name, availability in state["products_availability"].items():
             if availability == "no":

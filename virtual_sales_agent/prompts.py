@@ -1,6 +1,6 @@
 from datetime import datetime
-from langchain_core.prompts import ChatPromptTemplate
 
+from langchain_core.prompts import ChatPromptTemplate
 
 primary_assistant_prompt = ChatPromptTemplate.from_messages(
     [
@@ -15,7 +15,7 @@ Your main responsibilities are:
 
 Use the available tools to access product catalogs, create orders, and retrieve order details to address user inquiries accurately.  
 Never invent or assume information that is not explicitly provided in the database or tools. Always base your responses on verified data.  
-If your initial attempt to retrieve information is unsuccessful, persist by broadening your query scope. If no relevant information is found after these efforts, politely inform the user and suggest alternative options or next steps..
+If your initial attempt to retrieve information is unsuccessful or if no relevant information is found after these efforts, politely inform the user and suggest alternative options or next steps..
 \n\nCurrent user:\n<User>\n{user_info}\n</User>
 \nCurrent time: {time}.
 """,
