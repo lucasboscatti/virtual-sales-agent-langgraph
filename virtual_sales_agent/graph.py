@@ -2,20 +2,21 @@ from langchain_groq import ChatGroq
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import tools_condition
-from nodes import (
-    Assistant,
-    State,
+from nodes.assistant import Assistant
+from nodes.check_order_status_node import check_order_status_state
+from nodes.create_order_node import (
     add_order_state,
-    check_order_status_state,
     check_product_quantity_state,
     create_order_state,
-    query_products_info_state,
-    route_create_order,
-    route_tool,
-    routing_fuction,
-    search_products_recommendations_state,
     subtract_quantity_state,
 )
+from nodes.query_products_node import (
+    check_product_quantity_state,
+    query_products_info_state,
+)
+from nodes.recommend_product_node import search_products_recommendations_state
+from nodes.routing_functions import route_create_order, route_tool, routing_fuction
+from nodes.state import State
 from prompts import primary_assistant_prompt
 from tools import (
     check_order_status,
