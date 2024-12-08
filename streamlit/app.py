@@ -1,10 +1,13 @@
 import os
 import sys
+import uuid
+
+from langchain_core.runnables.graph import MermaidDrawMethod
 
 import streamlit as st
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from virtual_sales_agent.sales_agent import chat_agent
+from virtual_sales_agent.graph import app
 
 
 def set_page_config():
@@ -29,7 +32,15 @@ def display_chat_history():
             st.markdown(message["content"])
 
 
-def handle_user_input(question: str):
+def chat_agent(question, config):
+    events = app.stream({"messages": ("user", question)}, config)
+    for event in events:
+        if assistant_response := event.get("assistant"):
+            if final_response := assistant_response["messages"].content:
+                return final_response
+
+
+def handle_user_input(question: str, config: dict):
     st.session_state.messages.append({"role": "user", "content": question})
 
     with st.chat_message("assistant"):
@@ -43,7 +54,15 @@ def handle_user_input(question: str):
         )
 
 
-def main():
+def get_graph():
+    app.get_graph().draw_mermaid_png(
+        draw_method=MermaidDrawMethod.API, output_file_path="graph.png"
+    )
+
+    return st.image("graph.png")
+
+
+def main(config):
     set_page_config()
     initialize_session_state()
 
@@ -52,13 +71,24 @@ def main():
 
     with st.sidebar:
         st.button("New Chat", on_click=new_chat, type="primary")
+        st.button("See Sales Agent Workflow", on_click=get_graph, type="primary")
+
     display_chat_history()
 
     if question := st.chat_input("Ask your question:"):
         with st.chat_message("user"):
             st.markdown(question)
-        handle_user_input(question)
+        handle_user_input(question, config)
 
 
 if __name__ == "__main__":
-    main()
+    thread_id = str(uuid.uuid4())
+
+    config = {
+        "configurable": {
+            "customer_id": "12",
+            "thread_id": thread_id,
+        }
+    }
+
+    main(config)
