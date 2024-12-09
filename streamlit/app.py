@@ -92,11 +92,15 @@ def chat_agent(question: str, config: dict) -> str:
     """
     messages = chat_history()
     messages.append(HumanMessage(content=question))
-    events = app.stream({"messages": messages}, config)
-    for event in events:
-        if assistant_response := event.get("assistant"):
-            if final_response := assistant_response["messages"].content:
-                return final_response
+    try:
+        events = app.stream({"messages": messages}, config)
+        for event in events:
+            if assistant_response := event.get("assistant"):
+                if final_response := assistant_response["messages"].content:
+                    return final_response
+
+    except Exception:
+        return "Ops, algo deu errado, tente novamente."
 
 
 def handle_user_input(question: str, config: dict) -> None:
