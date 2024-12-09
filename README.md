@@ -1,5 +1,7 @@
 # Vendedor Virtual com LangChain e LangGraph via Streamlit
 
+![Fluxo de Interação do Vendedor Virtual](./graph.png "Fluxo de Interação do Vendedor Virtual")
+
 ## Objetivo
 
 Desenvolver um vendedor virtual que interaja com clientes via Streamlit, utilizando **LangChain**, **LangGraph** e um banco de dados SQLite fornecido. O bot deve responder a perguntas sobre produtos, estoque, pedidos e oferecer sugestões personalizadas com base no histórico do cliente.
