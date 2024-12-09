@@ -2,6 +2,7 @@ import json
 import os
 from typing import Annotated, Dict
 
+from dotenv import load_dotenv
 from langchain import hub
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
 from langchain_community.utilities import SQLDatabase
@@ -11,6 +12,8 @@ from sqlalchemy.engine import Engine
 from typing_extensions import Annotated, TypedDict
 
 from virtual_sales_agent.nodes.state import State
+
+load_dotenv()
 
 query_prompt_template = hub.pull("langchain-ai/sql-query-system-prompt")
 

@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
@@ -35,6 +36,8 @@ from virtual_sales_agent.tools import (
     search_products_recommendations,
 )
 from virtual_sales_agent.utils_functions import create_tool_node_with_fallback
+
+load_dotenv()
 
 llm = ChatGroq(model="llama3-groq-70b-8192-tool-use-preview", temperature=0)
 
