@@ -1,9 +1,21 @@
+from typing import Dict, List
+
 from langchain_core.messages import ToolMessage
 from langchain_core.runnables import RunnableLambda
 from langgraph.prebuilt import ToolNode
 
+from virtual_sales_agent.nodes.state import State
 
-def handle_tool_error(state) -> dict:
+
+def handle_tool_error(state: State) -> Dict[str, List[ToolMessage]]:
+    """Handles tool errors.
+
+    Arguments:
+        state (State): The state of the graph.
+
+    Returns:
+        Dict[str, List[ToolMessage]]: The messages to send to the user.
+    """
     error = state.get("error")
     tool_calls = state["messages"][-1].tool_calls
     return {
@@ -17,23 +29,15 @@ def handle_tool_error(state) -> dict:
     }
 
 
-def create_tool_node_with_fallback(tools: list) -> dict:
+def create_tool_node_with_fallback(tools: list) -> ToolNode:
+    """Creates a tool node with fallbacks.
+    
+    Arguments:
+        tools (list): The tools to create the node with.
+    
+    Returns:
+        ToolNode: The tool node with fallbacks.
+    """
     return ToolNode(tools).with_fallbacks(
         [RunnableLambda(handle_tool_error)], exception_key="error"
     )
-
-
-def _print_event(event: dict, _printed: set, max_length=1500):
-    current_state = event.get("dialog_state")
-    if current_state:
-        print("Currently in: ", current_state[-1])
-    message = event.get("messages")
-    if message:
-        if isinstance(message, list):
-            message = message[-1]
-        if message.id not in _printed:
-            msg_repr = message.pretty_repr(html=True)
-            if len(msg_repr) > max_length:
-                msg_repr = msg_repr[:max_length] + " ... (truncated)"
-            print(msg_repr)
-            _printed.add(message.id)

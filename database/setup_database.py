@@ -17,10 +17,13 @@ def download_and_extract_db(url: str, download_path: str, db_path: str) -> bool:
     """
     Downloads and extracts the SQLite database.
 
-    :param url: The URL to download the database from.
-    :param download_path: The path to save the downloaded file.
-    :param db_path: The path to extract the database to.
-    :return: True if the database is downloaded and extracted successfully, False otherwise.
+    Arguments:
+        url (str): The URL of the database file.
+        download_path (str): The path to save the downloaded file.
+        db_path (str): The path to save the extracted database file.
+
+    Returns:
+        bool: True if the database was downloaded and extracted successfully, False otherwise.
     """
     try:
 
@@ -54,8 +57,11 @@ def execute_sql_file(file_path: str) -> bool:
     """
     Executes SQL commands from a file.
 
-    :param file_path: The path to the SQL file containing the commands.
-    :return: True if the SQL script executed successfully, False otherwise.
+    Arguments:
+        file_path (str): The path to the SQL file.
+
+    Returns:
+        bool: True if the SQL commands were executed successfully, False otherwise.
     """
     try:
         with open(file_path, "r") as file:
@@ -77,12 +83,15 @@ def execute_sql_file(file_path: str) -> bool:
         return False
 
 
-def insert_products_from_json(file_path: str) -> None:
+def insert_products_from_json(file_path: str) -> bool:
     """
     Inserts products into the database from a JSON file.
 
-    :param file_path: The path to the JSON file containing product data.
-    :return: None
+    Arguments:
+        file_path (str): The path to the JSON file containing product data.
+
+    Returns:
+        bool: True if the products were inserted successfully, False otherwise.
     """
     try:
         df = pd.read_json(file_path)

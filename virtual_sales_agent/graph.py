@@ -36,7 +36,7 @@ from virtual_sales_agent.tools import (
 )
 from virtual_sales_agent.utils_functions import create_tool_node_with_fallback
 
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+llm = ChatGroq(model="llama3-groq-70b-8192-tool-use-preview", temperature=0)
 
 tools = [
     query_products_info,
