@@ -93,7 +93,7 @@ O bot deve consultar e manipular as seguintes tabelas:
 ## Configuração do Ambiente
 
 ### **1. Pré-requisitos**
-- Python 3.10 ou superior.
+- Python 3.12 ou superior.
 - Ambiente virtual configurado com `venv`.
 
 ### **2. Instalação**
