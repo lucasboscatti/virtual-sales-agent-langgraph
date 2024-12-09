@@ -3,4 +3,6 @@ from typing_extensions import Annotated, TypedDict
 
 
 class State(TypedDict):
+    """The state of the graph."""
+
     messages: Annotated[list[AnyMessage], add_messages]

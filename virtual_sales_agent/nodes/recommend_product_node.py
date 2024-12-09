@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from contextlib import closing
+from typing import Dict
 
 from virtual_sales_agent.nodes.state import State
 
@@ -10,7 +11,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from database.utils.database_functions import get_connection
 
 
-def search_products_recommendations_state(state: State):
+def search_products_recommendations_state(state: State) -> Dict[str, str]:
+    """Search for products recommendations.
+
+    Arguments:
+        state (State): The state of the graph.
+
+    Returns:
+        Dict[str, str]: The graph state with the recommendations.
+    """
     tool_messages = json.loads(state["messages"][-1].content)
     customer_id = tool_messages.get("CustomerId")
 
@@ -75,6 +84,8 @@ def search_products_recommendations_state(state: State):
                     for row in results
                 ]
             else:
-                recommendations = {"recommendations": "No purchases made yet."}
+                recommendations = {
+                    "recommendations": "Este cliente não possui pedidos recentes."
+                }
     state["messages"][-1].content = json.dumps(recommendations)
     return state

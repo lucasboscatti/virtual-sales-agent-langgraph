@@ -40,6 +40,14 @@ class QueryOutput(TypedDict):
 
 
 def query_products_info_state(state: State) -> Dict[str, str]:
+    """Create a SQL query based on the user's message.
+
+    Arguments:
+        state (State): The state of the graph.
+
+    Returns:
+        Dict[str, str]: The graph state with the SQL query result.
+    """
     tool_messages = json.loads(state["messages"][-1].content)
     user_message = tool_messages.get("user_message")
 
@@ -61,10 +69,11 @@ def query_products_info_state(state: State) -> Dict[str, str]:
     response = execute_query_tool.invoke(result["query"])
     state["messages"][-1].content = json.dumps(
         {
-            "query_result": "For the user message: "
+            "query_result": "Para a pergunta do usuário: "
             + user_message
-            + " the query result is: "
-            + str(response)
+            + " o resultado da consulta SQL é: "
+            + str(response),
+            "query": result["query"],
         }
     )
     return state

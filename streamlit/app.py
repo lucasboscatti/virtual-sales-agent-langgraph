@@ -93,11 +93,11 @@ def handle_user_input(question: str, config: dict) -> None:
         )
 
 
-def get_graph() -> st.Image:
+def get_graph():
     """Gets the graph for the chat agent.
 
     Returns:
-        st.Image: The image of the graph.
+        st.image: The image of the graph.
     """
     app.get_graph().draw_mermaid_png(
         draw_method=MermaidDrawMethod.API, output_file_path="graph.png"

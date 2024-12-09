@@ -12,6 +12,14 @@ from database.utils.database_functions import get_connection
 
 
 def check_order_status_state(state: State) -> Dict[str, str]:
+    """Check the status of an order.
+
+    Arguments:
+        state (State): The state of the graph.
+
+    Returns:
+        Dict[str, str]: The graph state with the order information.
+    """
     tool_messages = json.loads(state["messages"][-1].content)
     order_id = tool_messages.get("OrderId", None)
     customer_id = tool_messages.get("CustomerId")
@@ -33,10 +41,11 @@ def check_order_status_state(state: State) -> Dict[str, str]:
         if result:
             state["messages"][-1].content = json.dumps(result)
         else:
-            state["messages"][-1].content = json.dumps({"error": "Order not found."})
+            state["messages"][-1].content = json.dumps(
+                {"error": "Pedido não encontrado"}
+            )
 
     else:
-        # Query to fetch all orders for the customer
         query = """
         SELECT 
             o.OrderId, 
@@ -59,7 +68,7 @@ def check_order_status_state(state: State) -> Dict[str, str]:
             state["messages"][-1].content = json.dumps(orders)
         else:
             state["messages"][-1].content = json.dumps(
-                {"error": "No orders found for the given customer."}
+                {"error": "Nenhum pedido encontrado para este cliente"}
             )
 
     return state

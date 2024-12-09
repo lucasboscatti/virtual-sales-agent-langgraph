@@ -12,8 +12,16 @@ from database.utils.database_functions import get_connection
 
 
 def escalate_to_employee_state(state: State) -> Dict[str, str]:
+    """Escalate the order to an employee.
+
+    Arguments:
+        state (State): The state of the graph.
+
+    Returns:
+        Dict[str, str]: The graph state with the employee information.
+    """
     tool_messages = json.loads(state["messages"][-1].content)
-    reason = tool_messages.get("reason", None)
+    customer_id = tool_messages.get("CustomerId", None)
 
     query = """
     SELECT LastName, FirstName, Email
@@ -35,7 +43,7 @@ def escalate_to_employee_state(state: State) -> Dict[str, str]:
                         "FirstName": result[1],
                         "Email": result[2],
                     },
-                    "Reason": reason,
+                    "CustomerId": customer_id,
                 }
             )
 

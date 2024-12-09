@@ -13,10 +13,26 @@ from database.utils.database_functions import get_connection
 
 
 def create_order_state(state: State) -> Dict[str, str]:
+    """Create an order state
+
+    Arguments:
+        state (State): The state of the graph.
+
+    Returns:
+        Dict[str, str]: The graph state.
+    """
     return state
 
 
 def validate_product_name_state(state: State) -> Dict[str, str]:
+    """Check if the product name is valid.
+
+    Arguments:
+        state (State): The state of the graph.
+
+    Returns:
+        Dict[str, str]: The graph state with the valid products.
+    """
     tool_messages = json.loads(state["messages"][-1].content)
     products = tool_messages.get("Products")
 
@@ -40,6 +56,14 @@ def validate_product_name_state(state: State) -> Dict[str, str]:
 
 
 def check_product_quantity_state(state: State) -> Dict[str, str]:
+    """Check if the product quantity is valid.
+
+    Arguments:
+        state (State): The state of the graph.
+
+    Returns:
+        Dict[str, str]: The graph state with the products availability.
+    """
     tool_messages = json.loads(state["messages"][-1].content)
     products = tool_messages.get("Products")
     state["products_availability"] = {}
@@ -63,6 +87,14 @@ def check_product_quantity_state(state: State) -> Dict[str, str]:
 
 
 def add_order_state(state: State) -> Dict[str, str]:
+    """Add the order to the database.
+
+    Arguments:
+        state (State): The state of the graph.
+
+    Returns:
+        Dict[str, str]: The graph state with the order information.
+    """
     tool_messages = json.loads(state["messages"][-1].content)
     customer_id = tool_messages.get("CustomerId")
     products = tool_messages.get("Products")
@@ -100,6 +132,14 @@ def add_order_state(state: State) -> Dict[str, str]:
 
 
 def subtract_quantity_state(state: State) -> Dict[str, str]:
+    """Subtract the product quantity from the database.
+
+    Arguments:
+        state (State): The state of the graph.
+
+    Returns:
+        Dict[str, str]: The graph state.
+    """
     tool_messages = json.loads(state["messages"][-1].content)
     products = tool_messages.get("Products")
 

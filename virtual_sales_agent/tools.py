@@ -7,13 +7,13 @@ from langchain_core.tools import tool
 @tool
 def query_products_info(user_message: str) -> Dict[str, str]:
     """
-    Searches for products information
+    Buscas informações sobre produtos
 
-    Args:
-        user_message (str): The user's natural language message
+    Arguments:
+        user_message (str): Mensagem do usuário em linguagem natural
 
     example:
-        query_products_info("What are the most popular products?")
+        query_products_info("Qual produto mais caro?")
     """
     return {"user_message": user_message}
 
@@ -23,17 +23,16 @@ def create_order(
     products: List[Dict[str, Any]], *, config: RunnableConfig
 ) -> Dict[str, str]:
     """
-    Creates an order for the customer
+    Cria um novo pedido (compra de produtos) para o cliente.
 
-    Args:
-        products (List[Dict[str, Any]]): List of products to be included in the order
+    Arguments:
+        products (List[Dict[str, Any]]): A lista de produtos a serem comprados.
 
     Returns:
         str: Order ID
 
     Example:
-        create_order([{"ProductName": "Product A", "Quantity": 2}, {"ProductName": "Product B", "Quantity": 1}])
-        >>> "Order created successfully with order ID: 123"
+        create_order([{"ProductName": "Produto A", "Quantity": 2}, {"ProductName": "Produto B", "Quantity": 1}])
     """
 
     configuration = config.get("configurable", {})
@@ -50,10 +49,10 @@ def check_order_status(
     order_id: Union[str, None], *, config: RunnableConfig
 ) -> Dict[str, Union[str, None]]:
     """
-    Checks the status of the customer's order(s).
+    Verifica o status de um pedido específico ou todos os pedidos do cliente.
 
-    Args:
-        order_id (Union[str, None]): The ID of the specific order to check. If not provided, all orders for the customer will be returned.
+    Arguments:
+        order_id (Union[str, None]): o ID do pedido a ser verificado. Se nulo, todos os pedidos do cliente serão retornados.
     """
     configuration = config.get("configurable", {})
     customer_id = configuration.get("customer_id", None)
@@ -69,7 +68,7 @@ def check_order_status(
 
 @tool
 def search_products_recommendations(config: RunnableConfig) -> Dict[str, str]:
-    """Searches for products recommendations"""
+    """Busca por recomendações de produtos para o cliente."""
     configuration = config.get("configurable", {})
     customer_id = configuration.get("customer_id", None)
 
@@ -80,16 +79,12 @@ def search_products_recommendations(config: RunnableConfig) -> Dict[str, str]:
 
 
 @tool
-def escalate_to_employee(reason: str, *, config: RunnableConfig) -> Dict[str, str]:
-    """Escalates the conversation to an employee if the customer is not satisfied with the response or you are unable to resolve the issue.
-
-    Args:
-        reason (str): The reason for the escalation.
-    """
+def escalate_to_employee(config: RunnableConfig) -> Dict[str, str]:
+    """Escala o atendimento para atendente humano se o cliente pedir ou se você não está conseguindo ajudar o cliente."""
     configuration = config.get("configurable", {})
     customer_id = configuration.get("customer_id", None)
 
     if not customer_id:
         return ValueError("No customer ID configured.")
 
-    return {"reason": reason}
+    return {"CustomerId": customer_id}
