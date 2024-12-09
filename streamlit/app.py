@@ -134,6 +134,8 @@ def main(config: dict) -> None:
     set_page_config()
     initialize_session_state()
 
+    print("CONFIG", config)
+
     st.markdown(
         """
     <style>
@@ -259,7 +261,7 @@ def main(config: dict) -> None:
 
 if __name__ == "__main__":
     thread_id = str(uuid.uuid4())
-    chat_session = get_chat_session()
+    chat_session = str(uuid.uuid4())
 
     config = {
         "configurable": {
