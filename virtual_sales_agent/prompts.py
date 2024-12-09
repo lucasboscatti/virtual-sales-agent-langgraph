@@ -24,6 +24,7 @@ For product inquiries:
 For purchase intentions:
 - use the create order tool
 - for example when the user says "Eu quero comprar X unidades do produto Y"
+- Verify if the user informmed the quantity. Do not invent any order that the user didn't request.
 
 For order status:
 - Use order status tool to check current status
