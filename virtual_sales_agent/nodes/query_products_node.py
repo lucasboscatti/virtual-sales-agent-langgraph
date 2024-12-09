@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from typing import Annotated, Dict
 
 from dotenv import load_dotenv
@@ -7,33 +8,19 @@ from langchain import hub
 from langchain_community.tools.sql_database.tool import QuerySQLDataBaseTool
 from langchain_community.utilities import SQLDatabase
 from langchain_groq import ChatGroq
-from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
 from typing_extensions import Annotated, TypedDict
 
 from virtual_sales_agent.nodes.state import State
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from database.utils.database_functions import get_engine_for_chinook_db
 
 load_dotenv()
 
 query_prompt_template = hub.pull("langchain-ai/sql-query-system-prompt")
 
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
-
-
-def get_engine_for_chinook_db() -> Engine:
-    """
-    Creates an SQLAlchemy engine for the chinook database.
-
-    Returns:
-        Engine: An SQLAlchemy engine object.
-    """
-
-    script_dir = os.path.dirname(os.path.abspath(""))
-    db_path = os.path.join(script_dir, "vendedor_virtual/database/db/chinook.db")
-    db_uri = f"sqlite:///{db_path}"
-    return create_engine(
-        db_uri,
-    )
 
 
 class QueryOutput(TypedDict):

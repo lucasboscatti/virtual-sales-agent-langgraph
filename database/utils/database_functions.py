@@ -2,9 +2,25 @@ import logging
 import sqlite3
 from contextlib import closing
 
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
+
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
+
+
+def get_engine_for_chinook_db() -> Engine:
+    """
+    Creates an SQLAlchemy engine for the chinook database.
+
+    Returns:
+        Engine: An SQLAlchemy engine object.
+    """
+    db_uri = f"sqlite:///database/db/chinook.db"
+    return create_engine(
+        db_uri,
+    )
 
 
 def get_connection(db_path: str = "database/db/chinook.db") -> sqlite3.Connection:
