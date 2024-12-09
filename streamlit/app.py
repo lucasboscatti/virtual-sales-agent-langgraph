@@ -6,15 +6,19 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables.graph import MermaidDrawMethod
 
 import streamlit as st
-from streamlit.web.server.websocket_headers import _get_websocket_headers
+from streamlit.runtime.scriptrunner import get_script_run_ctx
+
+ctx = get_script_run_ctx()
+session_id = ctx.session_id
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from virtual_sales_agent.graph import app
 
 
 def _get_session():
-    headers = _get_websocket_headers()
-    return headers.get("Sec-Websocket-Key")
+    ctx = get_script_run_ctx()
+    session_id = ctx.session_id
+    return session_id
 
 
 def chat_history() -> list[HumanMessage, AIMessage]:
@@ -270,6 +274,7 @@ if __name__ == "__main__":
     thread_id = str(uuid.uuid4())
     chat_session = _get_session()
 
+    print("CHAT SESSION: ", chat_session)
     config = {
         "configurable": {
             "customer_id": chat_session,
