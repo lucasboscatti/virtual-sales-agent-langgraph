@@ -2,6 +2,7 @@ import os
 import sys
 import uuid
 
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables.graph import MermaidDrawMethod
 
 import streamlit as st
@@ -18,7 +19,23 @@ def _get_session():
     session_info = runtime._session_mgr.get_session_info(session_id)
     if session_info is None:
         raise RuntimeError("Couldn't get your Streamlit Session object.")
-    return session_info.session
+    return session_info.session.id
+
+
+def chat_history() -> list[HumanMessage, AIMessage]:
+    """Gets the chat history from the session state.
+
+    Returns:
+        list[HumanMessage, AIMessage]: The chat history.
+    """
+    return [
+        (
+            HumanMessage(content=message["content"])
+            if message["role"] == "user"
+            else AIMessage(content=message["content"])
+        )
+        for message in st.session_state.messages
+    ]
 
 
 def set_page_config() -> None:
@@ -74,7 +91,9 @@ def chat_agent(question: str, config: dict) -> str:
     Returns:
         str: The response from the chat agent.
     """
-    events = app.stream({"messages": ("user", question)}, config)
+    messages = chat_history()
+    messages.append(HumanMessage(content=question))
+    events = app.stream({"messages": messages}, config)
     for event in events:
         if assistant_response := event.get("assistant"):
             if final_response := assistant_response["messages"].content:
@@ -128,8 +147,6 @@ def main(config: dict) -> None:
     """
     set_page_config()
     initialize_session_state()
-
-    print("CONFIG", config)
 
     st.markdown(
         """
