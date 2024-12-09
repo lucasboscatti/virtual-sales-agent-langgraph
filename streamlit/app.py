@@ -18,7 +18,7 @@ def set_page_config() -> None:
     """
 
     st.set_page_config(
-        page_title="Virtual Sales Agent",
+        page_title="🛒 Vendedor Virtual com IA",
         layout="wide",
     )
 
@@ -118,12 +118,81 @@ def main(config: dict) -> None:
     set_page_config()
     initialize_session_state()
 
-    st.title("🤖 Virtual Sales Agent")
-    st.caption("A virtual sales agent for an e-commerce platform.")
+    st.markdown(
+        """
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+        }
+        .main {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        h2, h3, h4 {
+            color: #333333;
+        }
+        .sidebar .element-container {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .stButton button {
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+        }
+        .stButton button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+    st.title("🛒 Vendedor Virtual")
+    st.caption(
+        "🦜 Vendedor Virtual com LangChain e LangGraph para sua plataforma e-commerce."
+    )
 
     with st.sidebar:
-        st.button("New Chat", on_click=new_chat, type="primary")
-        st.button("See Sales Agent Workflow", on_click=get_graph, type="primary")
+        st.header("⚙️ **Configurações**")
+
+        st.button("🆕 Novo Chat", on_click=new_chat, type="primary")
+        st.button("🛠️ Visualizar Workflow do Agente", on_click=get_graph, type="primary")
+
+        st.markdown("## 🤖 Funcionalidades")
+        st.markdown("## 🛠️ **Funcionalidades do Vendedor Virtual**")
+        st.markdown(
+            """
+        ### 🛒 **Consulta de Produtos**
+        - Pergunte sobre produtos disponíveis, preços e estoque.
+        - **Exemplo**: “Quais são os produtos disponíveis?” ou “Qual o preço do produto X?”
+
+        ### 📝 **Criação de Pedidos**
+        - Permite a criação de pedidos baseados em informações do banco de dados.
+        - **Exemplo**: “Quero comprar 5 unidades do produto Y.”
+
+        ### 📦 **Consulta de Pedidos**
+        - Consulte o status de pedidos anteriores.
+        - **Exemplo**: “Qual é o status do meu pedido #12345?”
+
+        ### 🎯 **Sugestões Personalizadas**
+        - Recomendações com base no histórico de pedidos do cliente.
+        - **Exemplo**: “Baseado na sua última compra, recomendamos o produto Z.”
+
+        ### 👨‍💻 **Escalonamento para um Agente Humano**
+        - Escale a conversa para um atendente humano, se necessário.
+        - **Exemplo**: “Preciso falar com um atendente humano.”
+        """
+        )
 
     display_chat_history()
 
