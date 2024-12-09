@@ -8,15 +8,12 @@ from langchain_core.runnables.graph import MermaidDrawMethod
 import streamlit as st
 from streamlit.web.server.websocket_headers import _get_websocket_headers
 
-headers = _get_websocket_headers()
-
-session_id = headers.get("Sec-Websocket-Key")
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from virtual_sales_agent.graph import app
 
 
 def _get_session():
+    headers = _get_websocket_headers()
     return headers.get("Sec-Websocket-Key")
 
 
