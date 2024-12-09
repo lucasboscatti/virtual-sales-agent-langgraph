@@ -5,25 +5,9 @@ import uuid
 from langchain_core.runnables.graph import MermaidDrawMethod
 
 import streamlit as st
-from streamlit.runtime import get_instance
-from streamlit.runtime.scriptrunner import get_script_run_ctx
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from virtual_sales_agent.graph import app
-
-
-def get_chat_session() -> str:
-    """Gets the chat session ID.
-
-    Returns:
-        str: The chat session ID.
-    """
-    runtime = get_instance()
-    session_id = get_script_run_ctx().session_id
-    session_info = runtime._session_mgr.get_session_info(session_id)
-    if session_info is None:
-        raise RuntimeError("Couldn't get your Streamlit Session object.")
-    return session_info.session.id
 
 
 def set_page_config() -> None:
