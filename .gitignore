@@ -13,4 +13,3 @@ downloads/
 *.csv
 *.env
 .vscode
-*.db
