@@ -132,7 +132,7 @@ O bot deve consultar e manipular as seguintes tabelas:
 
 5. Execute o script de configuração do banco de dados:
     ```bash
-    python3 database/utils/setup_database.py
+    python3 database/setup_database.py
     ```
 
 5. Execute a aplicação de demonstração:
