@@ -137,45 +137,85 @@ def main(config: dict) -> None:
     st.markdown(
         """
     <style>
+        /* Estilo para o corpo da página */
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
+            background-color: #e3f2fd; /* Azul claro suave */
+            margin: 0;
+            padding: 0;
         }
+
+        /* Estilo para o contêiner principal */
         .main {
-            background-color: #ffffff;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff; /* Branco puro */
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15); /* Sombra mais suave e elegante */
         }
+
+        /* Títulos */
         h1 {
-            color: #4CAF50;
+            color: #1e88e5; /* Azul vibrante */
+            font-weight: bold;
         }
         h2, h3, h4 {
-            color: #333333;
+            color: #424242; /* Cinza escuro para contraste */
         }
+
+        /* Estilo para a barra lateral */
         .sidebar .element-container {
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            padding: 15px;
+            background-color: #f0f4c3; /* Verde claro suave */
+            border-radius: 15px;
+            padding: 20px;
             margin: 10px 0;
-            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
         }
+
+        /* Botão personalizado */
         .stButton button {
-            background-color: #4CAF50;
+            background-color: #1e88e5; /* Azul vibrante */
             color: white;
-            border-radius: 5px;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            transition: background-color 0.3s ease;
         }
         .stButton button:hover {
-            background-color: #45a049;
+            background-color: #1565c0; /* Azul mais escuro para o hover */
+            cursor: pointer;
+        }
+
+        /* Cabeçalho personalizado */
+        .custom-header {
+            background-color: #263238; /* Cinza escuro para contraste */
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .custom-header h2 {
+            color: #ffffff; /* Branco para contraste */
+            font-size: 28px;
+        }
+        .custom-header h4 {
+            color: #b0bec5; /* Cinza claro para subtítulos */
+            font-size: 20px;
         }
     </style>
     """,
         unsafe_allow_html=True,
     )
 
-    st.title("🛒 Vendedor Virtual")
-    st.caption(
-        "🦜 Vendedor Virtual com LangChain e LangGraph para sua plataforma e-commerce."
+    st.markdown(
+        """
+        <div class="custom-header">
+            <h2>🛒 Vendedor Virtual</h2>
+            <h4>🦜 Construído com LangChain e LangGraph para sua plataforma e-commerce.</h4>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     with st.sidebar:
@@ -184,7 +224,6 @@ def main(config: dict) -> None:
         st.button("🆕 Novo Chat", on_click=new_chat, type="primary")
         st.button("🛠️ Visualizar Workflow do Agente", on_click=get_graph, type="primary")
 
-        st.markdown("## 🤖 Funcionalidades")
         st.markdown("## 🛠️ **Funcionalidades do Vendedor Virtual**")
         st.markdown(
             """
