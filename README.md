@@ -59,6 +59,7 @@ O bot deve consultar e manipular as seguintes tabelas:
 .
 ├── database/
 │   ├── db/
+│   │   ├── chinook.db            # Banco de dados Chinook
 │   │   ├── products.json         # Dados de produtos que serão usados no bot
 │   │   └── schemas.sql           # Definições de esquemas em SQL
 │   ├── utils/
@@ -130,7 +131,7 @@ O bot deve consultar e manipular as seguintes tabelas:
         export LANGCHAIN_PROJECT=virtual-sales-agent
         ```
 
-5. Execute o script de configuração do banco de dados:
+5. [OPCIONAL] O banco já está baixado e configurado, caso contrário, execute o script:
     ```bash
     python3 database/setup_database.py
     ```
